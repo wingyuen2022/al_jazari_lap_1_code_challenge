@@ -41,64 +41,78 @@ function updateSearchResult(searchResult) {
     const nextPageButton = document.querySelector('#nextPage');
     const previousPageButton = document.querySelector('#previousPage');
     let error = searchResult.error;
-    if (error !== undefined && error !== null) {
+    if (error !== undefined) {
         let errorMessage = `${error.code} ${error.message}`;
         document.querySelector('#searchResult').innerHTML = `<span>Unexpected error</span><br><br><span>${errorMessage}</span>`;
         document.querySelector('#searchResultInfo').innerHTML = `About 0 results (0.0 seconds)`;
     } else {
         let htmlCode = '';
+        let curUrl = window.location.href;
         let results = searchResult.items;
-        results.forEach((curResult)=>{
-            htmlCode = htmlCode + `<div class=\"card p-3\" style=\"width: 60rem;\">`;
-            htmlCode = htmlCode + `<div class=\"row\"><div class=\"col\">`;
-            htmlCode = htmlCode + `<span>${curResult.htmlFormattedUrl}</span>`;
-            htmlCode = htmlCode + `<a href=\"${curResult.link} target=\"_blank\"><h4>${curResult.htmlTitle}</h4><\a>`;
-            htmlCode = htmlCode + `<span>${curResult.htmlSnippet}</span>`;
-            htmlCode = htmlCode + `</div></div>`;
-            htmlCode = htmlCode + `</div>`;
-        });
-        document.querySelector('#searchResult').innerHTML = htmlCode;
-        let information = searchResult.searchInformation;
-        document.querySelector('#searchResultInfo').innerHTML = `About ${information.formattedTotalResults} results (${information.formattedSearchTime} seconds)`;
-
-        let queries = searchResult.queries;
-        if (queries !== undefined && queries !== null) {
-            if (queries.nextPage !== undefined && queries.nextPage !== null) {
-                nextPageButton.removeAttribute("hidden"); 
-                let nextIndex = queries.nextPage[0].startIndex;
-                if (nextIndex > 10) {
-                    nextPageButton.addEventListener('click', (e)=>{
-                        window.location.href = `${window.location.href}&start=${nextIndex}`;
-                        e.preventDefault();
-                    });
-                }
-            } else {
-                nextPageButton.setAttribute('hidden', true);
+        if (results === undefined) {
+            document.querySelector('#searchResultInfo').innerHTML = `About 0 results (0.0 seconds)`;
+            nextPageButton.setAttribute('hidden', true);
+            previousPageButton.setAttribute('hidden', true);
+            return;
+        }
+        if (curUrl.includes('&lucky=true')) {
+            if (results.length > 0) {
+                document.querySelector('#searchResult').innerHTML = `Being redirected to a lucky page...`;
+                window.location.href = results[0].link;
+                // EXIT
             }
-            if (queries.previousPage !== undefined && queries.previousPage !== null) {
-                previousPageButton.removeAttribute("hidden"); 
-                let previousIndex = queries.previousPage[0].startIndex;
-                previousPageButton.addEventListener('click', (e)=>{
-                    let curUrl = window.location.href;
-                    let tokens = curUrl.split('?');
-                    let parameters = tokens[1].split('&');
-                    let parviousUrl = '';
-                    parameters.forEach((curParameter)=>{
-                        let pairs = curParameter.split('=');
-                        let name = pairs[0];
-                        let value = pairs[1];
-                        if (name === 'start') {
-                            parviousUrl = `${parviousUrl}&start=${previousIndex}`;
-                        } else {
-                            parviousUrl = `${parviousUrl}&keyword=${value}`;
-                        }
+        } else {
+            results.forEach((curResult)=>{
+                htmlCode = `${htmlCode} <div class=\"card p-3\" style=\"width: 60rem;\">`;
+                htmlCode = `${htmlCode} <div class=\"row\"><div class=\"col\">`;
+                htmlCode = `${htmlCode} <span>${curResult.htmlFormattedUrl}</span>`;
+                htmlCode = `${htmlCode} <a href=\"${curResult.link} target=\"_blank\"><h4>${curResult.htmlTitle}</h4><\a>`;
+                htmlCode = `${htmlCode} <span>${curResult.htmlSnippet}</span>`;
+                htmlCode = `${htmlCode} </div></div>`;
+                htmlCode = `${htmlCode} </div>`;
+            });
+            document.querySelector('#searchResult').innerHTML = htmlCode;
+            let information = searchResult.searchInformation;
+            document.querySelector('#searchResultInfo').innerHTML = `About ${information.formattedTotalResults} results (${information.formattedSearchTime} seconds)`;
+    
+            let queries = searchResult.queries;
+            if (queries !== undefined) {
+                if (queries.nextPage !== undefined) {
+                    let nextIndex = queries.nextPage[0].startIndex;
+                    nextPageButton.addEventListener('click', (e)=>{
+                        window.location.href = `${curUrl}&start=${nextIndex}`;
+                        e.preventDefault();
+                        // Exit
                     });
-                    parviousUrl = parviousUrl.replace('&keyword=', '?keyword=');
-                    window.location.href = `${parviousUrl}`;
-                    e.preventDefault();
-                });
-            } else {
-                previousPageButton.setAttribute('hidden', true);
+                    nextPageButton.removeAttribute("hidden"); 
+                } else {
+                    nextPageButton.setAttribute('hidden', true);
+                }
+                if (queries.previousPage !== undefined) {
+                    let previousIndex = queries.previousPage[0].startIndex;
+                    previousPageButton.addEventListener('click', (e)=>{
+                        let tokens = curUrl.split('?');
+                        let parameters = tokens[1].split('&');
+                        let parviousUrl = '';
+                        parameters.forEach((curParameter)=>{
+                            let pairs = curParameter.split('=');
+                            let name = pairs[0];
+                            let value = pairs[1];
+                            if (name === 'start') {
+                                parviousUrl = `${parviousUrl}&start=${previousIndex}`;
+                            } else {
+                                parviousUrl = `${parviousUrl}&keyword=${value}`;
+                            }
+                        });
+                        parviousUrl = parviousUrl.replace('&keyword=', '?keyword=');
+                        window.location.href = `${parviousUrl}`;
+                        e.preventDefault();
+                        // Exit
+                    });
+                    previousPageButton.removeAttribute("hidden"); 
+                } else {
+                    previousPageButton.setAttribute('hidden', true);
+                }
             }
         }
     }
