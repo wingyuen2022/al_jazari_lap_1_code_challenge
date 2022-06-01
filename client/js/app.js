@@ -34,7 +34,7 @@ async function performSearch(currentUrl) {
 
 function updateSearchResult(searchResult) {
     let error = searchResult.error;
-    if (error.code !== undefined && error.code !== null && error.code !== "") {
+    if (error !== undefined && error !== null) {
         let errorMessage = `${error.code} ${error.message}`;
         document.querySelector('#searchResult').innerHTML = `<span>Unexpected error</span><br><br><span>${errorMessage}</span>`;
         document.querySelector('#searchResultInfo').innerHTML = `About 0 results (0.0 seconds)`;
