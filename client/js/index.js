@@ -1,3 +1,5 @@
+// Global result variable
+
 const searchForm = document.querySelector('#search-form');
 const searchResultForm = document.querySelector('#search-result-form');
 
@@ -10,13 +12,13 @@ if (typeof searchForm !== 'undefined' && !!searchForm) {
 }
 if (typeof searchResultForm !== 'undefined' && !!searchResultForm ) {
     const clearSearchButton = document.querySelector('#clear-search');
-    const searchAgainButton = document.querySelector('#search-again');
     clearSearchButton.addEventListener('click', ()=>{
         window.location.href = `search.html`;
         document.querySelector('#searchAgain').value = "";
         document.querySelector('#searchAgain').placeHolder = "Anything";
         document.querySelector('#searchResult').innerHTML = "";
     });
+    const searchAgainButton = document.querySelector('#search-again');
     searchAgainButton.addEventListener('click', (e)=>{
         const keyword = document.querySelector('#searchAgain').value;
         if (keyword !== "") {
@@ -25,6 +27,5 @@ if (typeof searchResultForm !== 'undefined' && !!searchResultForm ) {
             // Exit
         }
     });
-    const url = window.location.href;
-    performSearch(url);
+    performSearch();
 }
